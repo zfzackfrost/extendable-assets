@@ -11,7 +11,7 @@ pub enum FilesystemError {
     #[error("Asset not found: {0}")]
     NotFound(String),
     /// Any other filesystem-related error.
-    #[error("{0}")]
+    #[error(transparent)]
     Other(anyhow::Error),
 }
 
