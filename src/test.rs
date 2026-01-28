@@ -44,7 +44,8 @@ impl AssetType for TestAssetType {
 }
 
 fn setup(asset_id_out: Option<&mut AssetId>, asset_type: bool) -> AssetManager {
-    let mgr = AssetManager::new(Arc::new(NativeFilesystem::new("./")));
+    let cwd = std::env::current_dir().unwrap();
+    let mgr = AssetManager::new(Arc::new(NativeFilesystem::new(cwd)));
     if asset_type {
         mgr.register_asset_type(Arc::new(TestAssetType));
     }
