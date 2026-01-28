@@ -67,3 +67,21 @@ impl Filesystem for NativeFilesystem {
         Ok(bytes)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use std::sync::Arc;
+
+    /// Tests that the native filesystem can successfully read a test file.
+    #[test]
+    fn native_fs_read() {
+        // Create a filesystem instance rooted at the current directory
+        let fs: Arc<dyn Filesystem> =
+            Arc::new(NativeFilesystem::new(std::env::current_dir().unwrap()));
+
+        // Read a test file and verify its contents
+        let greeting = fs.read_bytes("test_data/hello.txt").unwrap();
+        assert_eq!(greeting, b"Hello world\n");
+    }
+}
