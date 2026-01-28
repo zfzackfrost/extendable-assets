@@ -5,7 +5,7 @@ use parking_lot::Mutex;
 
 use crate::asset::{Asset, AssetId};
 use crate::asset_type::AssetType;
-use crate::filesystem::Filesystem;
+use crate::filesystem::{Filesystem, FilesystemError};
 use crate::util::U64HashMap;
 
 /// Central manager for assets in the system.
@@ -107,5 +107,22 @@ impl AssetManager {
         asset.set_id(id);
         self.assets.lock().insert(id, Arc::new(asset));
         id
+    }
+
+    /// Reads the raw bytes of a file from the filesystem.
+    ///
+    /// This is a convenience method that delegates to the underlying filesystem
+    /// for reading asset files as byte arrays.
+    ///
+    /// # Arguments
+    ///
+    /// * `asset_path` - The path to the file to read
+    ///
+    /// # Returns
+    ///
+    /// A `Result` containing the file contents as bytes, or a `FilesystemError` if reading fails.
+    #[inline]
+    pub fn fs_read_bytes(&self, asset_path: &str) -> Result<Vec<u8>, FilesystemError> {
+        self.filesystem.read_bytes(asset_path)
     }
 }
