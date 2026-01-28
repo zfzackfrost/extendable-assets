@@ -9,7 +9,7 @@ use crate::filesystem::Filesystem;
 use crate::util::U64HashMap;
 
 /// Central manager for assets in the system.
-/// 
+///
 /// The asset manager is responsible for:
 /// - Registering and retrieving asset types
 /// - Managing asset lifecycles and unique IDs
@@ -27,9 +27,9 @@ pub struct AssetManager {
 }
 impl AssetManager {
     /// Creates a new asset manager with the provided filesystem.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `filesystem` - The filesystem implementation to use for asset I/O
     #[inline]
     pub fn new(filesystem: Arc<dyn Filesystem>) -> Self {
@@ -43,13 +43,13 @@ impl AssetManager {
     }
 
     /// Retrieves an asset type by its name.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `name` - The name of the asset type to look up
-    /// 
+    ///
     /// # Returns
-    /// 
+    ///
     /// The asset type if found, or `None` if no asset type with that name is registered.
     #[inline]
     pub fn asset_type_by_name(&self, name: &str) -> Option<Arc<dyn AssetType>> {
@@ -57,12 +57,12 @@ impl AssetManager {
         asset_types.get(name).cloned()
     }
     /// Registers a new asset type with the manager.
-    /// 
+    ///
     /// This allows the asset manager to handle assets of this type.
     /// If an asset type with the same name already exists, it will be replaced.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `asset_type` - The asset type implementation to register
     pub fn register_asset_type(&self, asset_type: Arc<dyn AssetType>) {
         self.asset_types
@@ -70,13 +70,13 @@ impl AssetManager {
             .insert(asset_type.name().to_string(), asset_type);
     }
     /// Retrieves an asset by its unique ID.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `id` - The unique identifier of the asset
-    /// 
+    ///
     /// # Returns
-    /// 
+    ///
     /// The asset if found, or `None` if no asset with that ID is registered.
     #[inline]
     pub fn asset_by_id(&self, id: AssetId) -> Option<Arc<Asset>> {
@@ -84,7 +84,7 @@ impl AssetManager {
         assets.get(&id).cloned()
     }
     /// Generates a unique asset ID.
-    /// 
+    ///
     /// This is an internal method that atomically increments the ID counter.
     #[inline]
     fn gen_asset_id(&self) -> AssetId {
@@ -94,13 +94,13 @@ impl AssetManager {
         id
     }
     /// Registers an asset with the manager and assigns it a unique ID.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `asset` - The asset to register
-    /// 
+    ///
     /// # Returns
-    /// 
+    ///
     /// The unique ID assigned to the asset
     pub fn register_asset(&self, mut asset: Asset) -> AssetId {
         let id = self.gen_asset_id();

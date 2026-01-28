@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::hash::{BuildHasherDefault, Hasher};
 
 /// A specialized hasher optimized for u64 keys.
-/// 
+///
 /// This hasher is designed specifically for hashing u64 values efficiently
 /// by using a simple multiplication with a large prime number.
 #[derive(Clone, Default)]
@@ -15,12 +15,12 @@ impl Hasher for U64Hasher {
     fn finish(&self) -> u64 {
         self.value
     }
-    
+
     /// Generic byte writing is not implemented for this specialized hasher.
     fn write(&mut self, _bytes: &[u8]) {
         unimplemented!()
     }
-    
+
     /// Optimized hashing for u64 values using prime multiplication.
     fn write_u64(&mut self, i: u64) {
         // Large prime number close to 2^63 for good distribution
@@ -32,14 +32,14 @@ impl Hasher for U64Hasher {
 pub(crate) type U64HahserBuilder = BuildHasherDefault<U64Hasher>;
 
 /// A HashMap optimized for u64 keys using the specialized U64Hasher.
-/// 
+///
 /// This provides better performance for asset ID lookups compared to the default hasher.
 pub(crate) type U64HashMap<V> = HashMap<u64, V, U64HahserBuilder>;
 
 #[cfg(test)]
 mod test {
     use super::*;
-    
+
     /// Test that the U64HashMap correctly stores and retrieves values.
     #[test]
     fn hash_map_u64() {
@@ -53,7 +53,7 @@ mod test {
         // Create a hash map with our optimized hasher
         let mut hash_map =
             U64HashMap::<u8>::with_capacity_and_hasher(1 << 16, U64HahserBuilder::new());
-            
+
         for n in nums {
             // Insert a random value for each key
             let value = rng().random();

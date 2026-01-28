@@ -8,7 +8,7 @@ use crate::asset_type::AssetType;
 pub type AssetId = u64;
 
 /// An asset containing type information and data.
-/// 
+///
 /// Assets are the core data containers in the asset system. Each asset has
 /// a unique ID, an asset type that defines how to load and save it, and the
 /// actual data payload.
@@ -22,12 +22,12 @@ pub struct Asset {
 }
 impl Asset {
     /// Creates a new asset with the given type and data.
-    /// 
+    ///
     /// The asset ID is initially set to 0 and will be assigned by the asset manager
     /// when the asset is registered.
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `asset_type` - The type definition for this asset
     /// * `data` - The actual asset data
     #[inline]
@@ -45,7 +45,7 @@ impl Asset {
         self.id
     }
     /// Sets the asset's unique identifier.
-    /// 
+    ///
     /// This is only used internally by the asset manager during registration.
     #[inline]
     pub(crate) fn set_id(&mut self, new_id: AssetId) {
@@ -57,7 +57,7 @@ impl Asset {
         Arc::clone(&self.asset_type)
     }
     /// Returns a reference to the asset's data.
-    /// 
+    ///
     /// The data can be downcast to the specific type using the downcast methods
     /// provided by the `DowncastSync` super-trait.
     #[inline]
@@ -67,7 +67,7 @@ impl Asset {
 }
 
 /// Trait for asset data that can be stored in an asset.
-/// 
+///
 /// This trait extends `DowncastSync` to allow for safe downcasting to concrete types.
 /// Types must explicitly implement this trait to be used as asset data.
 pub trait AssetData: DowncastSync {}

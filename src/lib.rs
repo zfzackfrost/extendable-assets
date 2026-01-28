@@ -1,5 +1,5 @@
 //! # Extendable Assets
-//! 
+//!
 //! An asset framework for graphics and games that provides flexible asset management,
 //! loading, and saving capabilities.
 
