@@ -101,10 +101,12 @@ impl AssetManager {
                     _ => {
                         let mut buf = [0; 4];
                         let encoded = c.encode_utf8(&mut buf);
-                        encoded
-                            .bytes()
-                            .map(|b| format!("%{:02X}", b))
-                            .collect::<String>()
+                        let mut strs = encoded.bytes().map(|b| format!("%{:02X}", b));
+                        if c.is_ascii() {
+                            strs.next_back().unwrap()
+                        } else {
+                            strs.collect::<String>()
+                        }
                     }
                 }
             })
