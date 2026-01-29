@@ -3,6 +3,9 @@ use std::sync::{Arc, Weak};
 
 use parking_lot::Mutex;
 
+use xxhash_rust::const_xxh3::const_custom_default_secret;
+use xxhash_rust::xxh3::xxh3_64_with_secret;
+
 use crate::asset::{Asset, AssetId};
 use crate::asset_type::AssetType;
 use crate::filesystem::{Filesystem, FilesystemError};
@@ -12,7 +15,7 @@ use crate::util::U64HashMap;
 ///
 /// The asset manager is responsible for:
 /// - Registering and retrieving asset types
-/// - Managing asset lifecycles and unique IDs
+/// - Managing asset lifecycles and hash-based unique IDs
 /// - Providing access to the filesystem for asset operations
 /// - Thread-safe storage of assets and their metadata
 pub struct AssetManager {
@@ -22,8 +25,6 @@ pub struct AssetManager {
     assets: Mutex<U64HashMap<Arc<Asset>>>,
     /// Filesystem abstraction for reading and writing asset files
     filesystem: Arc<dyn Filesystem>,
-    /// Counter for generating unique asset IDs
-    next_id: Mutex<AssetId>,
 }
 impl AssetManager {
     /// Creates a new asset manager with the provided filesystem.
@@ -37,8 +38,6 @@ impl AssetManager {
             asset_types: Mutex::new(HashMap::default()),
             assets: Mutex::new(HashMap::default()),
             filesystem,
-            // Start asset IDs from 1 (0 is reserved for uninitialized assets)
-            next_id: Mutex::new(1),
         }
     }
 
@@ -83,27 +82,30 @@ impl AssetManager {
         let assets = self.assets.lock();
         assets.get(&id).cloned()
     }
-    /// Generates a unique asset ID.
+    /// Generates a deterministic asset ID from an asset path.
     ///
-    /// This is an internal method that atomically increments the ID counter.
+    /// Uses XXH3 hash with a custom secret to generate consistent IDs
+    /// for the same asset path across application restarts.
     #[inline]
-    fn gen_asset_id(&self) -> AssetId {
-        let mut next_id = self.next_id.lock();
-        let id = *next_id;
-        *next_id += 1;
-        id
+    fn gen_asset_id(&self, asset_path: &str) -> AssetId {
+        const SECRET: [u8; 192] = const_custom_default_secret(1111);
+        xxh3_64_with_secret(asset_path.as_bytes(), &SECRET)
     }
-    /// Registers an asset with the manager and assigns it a unique ID.
+    /// Registers an asset with the manager and assigns it a deterministic ID.
+    ///
+    /// The asset ID is generated from the asset path using hash-based generation,
+    /// ensuring the same path always produces the same ID.
     ///
     /// # Arguments
     ///
+    /// * `asset_path` - The path string used to generate the asset ID
     /// * `asset` - The asset to register
     ///
     /// # Returns
     ///
-    /// The unique ID assigned to the asset
-    pub fn register_asset(&self, mut asset: Asset) -> AssetId {
-        let id = self.gen_asset_id();
+    /// The deterministic ID assigned to the asset
+    pub fn register_asset(&self, asset_path: &str, mut asset: Asset) -> AssetId {
+        let id = self.gen_asset_id(asset_path);
         asset.set_id(id);
         self.assets.lock().insert(id, Arc::new(asset));
         id

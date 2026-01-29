@@ -12,15 +12,18 @@ fn setup(asset_id_out: Option<&mut AssetId>, asset_type: bool) -> AssetManager {
         mgr.register_asset_type(Arc::new(TestAssetType));
     }
     if let Some(asset_id_out) = asset_id_out {
-        *asset_id_out = mgr.register_asset(Asset::new(
-            mgr.asset_type_by_name("TestAsset")
-                .expect("Asset type not found"),
-            Box::new(TestAssetData {
-                value_a: 42,
-                value_b: std::f32::consts::PI,
-                value_c: (1, 2, 3),
-            }),
-        ));
+        *asset_id_out = mgr.register_asset(
+            "test_asset_01",
+            Asset::new(
+                mgr.asset_type_by_name("TestAsset")
+                    .expect("Asset type not found"),
+                Box::new(TestAssetData {
+                    value_a: 42,
+                    value_b: std::f32::consts::PI,
+                    value_c: (1, 2, 3),
+                }),
+            ),
+        );
     }
     mgr
 }
