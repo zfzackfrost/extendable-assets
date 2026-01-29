@@ -88,6 +88,28 @@ impl AssetManager {
     /// for the same asset path across application restarts.
     #[inline]
     fn gen_asset_id(&self, asset_path: &str) -> AssetId {
+        // Encode asset path
+        let asset_path: String = asset_path
+            .chars()
+            .map(|c| {
+                match c {
+                    // Unreserved characters (RFC 3986)
+                    'A'..='Z' | 'a'..='z' | '0'..='9' | '-' | '_' | '.' | '~' => c.to_string(),
+                    // Preserve forward slashes
+                    '/' => c.to_string(),
+                    // Everything else gets percent-encoded
+                    _ => {
+                        let mut buf = [0; 4];
+                        let encoded = c.encode_utf8(&mut buf);
+                        encoded
+                            .bytes()
+                            .map(|b| format!("%{:02X}", b))
+                            .collect::<String>()
+                    }
+                }
+            })
+            .collect();
+
         const SECRET: [u8; 192] = const_custom_default_secret(1111);
         xxh3_64_with_secret(asset_path.as_bytes(), &SECRET)
     }

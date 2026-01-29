@@ -1,1 +1,2 @@
 merge_derives = false
+force_multiline_blocks = true
