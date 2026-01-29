@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::sync::Weak;
 
 use downcast_rs::{DowncastSync, impl_downcast};
 
@@ -16,7 +16,7 @@ pub struct Asset {
     /// Unique identifier for this asset
     id: AssetId,
     /// Type definition that specifies how to handle this asset
-    asset_type: Arc<dyn AssetType>,
+    asset_type: Weak<dyn AssetType>,
     /// The actual asset data
     data: Box<dyn AssetData>,
 }
@@ -31,7 +31,7 @@ impl Asset {
     /// * `asset_type` - The type definition for this asset
     /// * `data` - The actual asset data
     #[inline]
-    pub fn new(asset_type: Arc<dyn AssetType>, data: Box<dyn AssetData>) -> Self {
+    pub fn new(asset_type: Weak<dyn AssetType>, data: Box<dyn AssetData>) -> Self {
         Self {
             // ID will be set by the asset manager during registration
             id: 0,
@@ -53,8 +53,8 @@ impl Asset {
     }
     /// Returns a clone of the asset type definition.
     #[inline]
-    pub fn asset_type(&self) -> Arc<dyn AssetType> {
-        Arc::clone(&self.asset_type)
+    pub fn asset_type(&self) -> Weak<dyn AssetType> {
+        Weak::clone(&self.asset_type)
     }
     /// Returns a reference to the asset's data.
     ///

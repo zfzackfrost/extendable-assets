@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::sync::Arc;
+use std::sync::{Arc, Weak};
 
 use parking_lot::Mutex;
 
@@ -52,9 +52,9 @@ impl AssetManager {
     ///
     /// The asset type if found, or `None` if no asset type with that name is registered.
     #[inline]
-    pub fn asset_type_by_name(&self, name: &str) -> Option<Arc<dyn AssetType>> {
+    pub fn asset_type_by_name(&self, name: &str) -> Option<Weak<dyn AssetType>> {
         let asset_types = self.asset_types.lock();
-        asset_types.get(name).cloned()
+        asset_types.get(name).map(Arc::downgrade)
     }
     /// Registers a new asset type with the manager.
     ///

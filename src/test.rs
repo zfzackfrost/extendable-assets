@@ -69,6 +69,7 @@ fn register_get_asset_type() {
     let asset_type = mgr.asset_type_by_name("TestAsset");
     assert!(asset_type.is_some());
     let asset_type = asset_type.unwrap();
+    let asset_type = asset_type.upgrade().unwrap();
     let name = asset_type.name();
     assert_eq!(name, "TestAsset");
 }
