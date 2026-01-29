@@ -1,6 +1,8 @@
 mod native;
 pub use native::*;
 
+use async_trait::async_trait;
+
 /// Errors that can occur during filesystem operations.
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
@@ -20,8 +22,13 @@ pub enum FilesystemError {
 ///
 /// This trait allows the asset system to work with different filesystem
 /// implementations, such as native filesystem, network storage, or embedded assets.
+/// All filesystem operations are async to support non-blocking I/O.
+#[async_trait]
 pub trait Filesystem: Send + Sync {
-    /// Reads the contents of an asset file as raw bytes.
+    /// Asynchronously reads the contents of an asset file as raw bytes.
+    ///
+    /// This method performs non-blocking I/O to read the entire file into memory.
+    /// For large files, consider implementing streaming or chunked reading.
     ///
     /// # Arguments
     ///
@@ -29,6 +36,6 @@ pub trait Filesystem: Send + Sync {
     ///
     /// # Returns
     ///
-    /// The file contents as bytes, or an error if the file could not be read.
-    fn read_bytes(&self, asset_path: &str) -> Result<Vec<u8>, FilesystemError>;
+    /// A future that resolves to the file contents as bytes, or an error if the file could not be read.
+    async fn read_bytes(&self, asset_path: &str) -> Result<Vec<u8>, FilesystemError>;
 }

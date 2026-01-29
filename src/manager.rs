@@ -109,10 +109,10 @@ impl AssetManager {
         id
     }
 
-    /// Reads the raw bytes of a file from the filesystem.
+    /// Asynchronously reads the raw bytes of a file from the filesystem.
     ///
     /// This is a convenience method that delegates to the underlying filesystem
-    /// for reading asset files as byte arrays.
+    /// for reading asset files as byte arrays. The operation is non-blocking.
     ///
     /// # Arguments
     ///
@@ -120,9 +120,9 @@ impl AssetManager {
     ///
     /// # Returns
     ///
-    /// A `Result` containing the file contents as bytes, or a `FilesystemError` if reading fails.
+    /// A future that resolves to the file contents as bytes, or a `FilesystemError` if reading fails.
     #[inline]
-    pub fn fs_read_bytes(&self, asset_path: &str) -> Result<Vec<u8>, FilesystemError> {
-        self.filesystem.read_bytes(asset_path)
+    pub async fn fs_read_bytes(&self, asset_path: &str) -> Result<Vec<u8>, FilesystemError> {
+        self.filesystem.read_bytes(asset_path).await
     }
 }

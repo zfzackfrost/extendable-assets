@@ -2,10 +2,13 @@ use std::path::{Path, PathBuf};
 
 use crate::filesystem::{Filesystem, FilesystemError};
 
+use async_trait::async_trait;
+
 /// A filesystem implementation that reads from the native OS filesystem.
 ///
-/// This implementation provides access to files on the local filesystem,
+/// This implementation provides async access to files on the local filesystem,
 /// with all asset paths resolved relative to a configured root directory.
+/// Currently uses blocking I/O operations wrapped in async functions.
 pub struct NativeFilesystem {
     /// Root directory where all asset paths are resolved relative to
     root_dir: PathBuf,
@@ -22,8 +25,9 @@ impl NativeFilesystem {
         }
     }
 }
+#[async_trait]
 impl Filesystem for NativeFilesystem {
-    fn read_bytes(&self, asset_path: &str) -> Result<Vec<u8>, FilesystemError> {
+    async fn read_bytes(&self, asset_path: &str) -> Result<Vec<u8>, FilesystemError> {
         // Resolve the asset path relative to our root directory
         let path = self.root_dir.join(asset_path);
 
@@ -32,7 +36,8 @@ impl Filesystem for NativeFilesystem {
             return Err(FilesystemError::NotFound(asset_path.to_string()));
         }
 
-        // Read the entire file into memory
+        // Read the entire file into memory asynchronously
+        // Note: Currently using blocking I/O - could be improved with tokio::fs for true async I/O
         let bytes = std::fs::read(path).map_err(FilesystemError::from)?;
         Ok(bytes)
     }
@@ -43,15 +48,18 @@ mod test {
     use super::*;
     use std::sync::Arc;
 
-    /// Tests that the native filesystem can successfully read a test file.
+    /// Tests that the native filesystem can successfully read a test file asynchronously.
+    ///
+    /// Uses pollster to block on the async operation for testing purposes.
     #[test]
     fn read_bytes() {
         // Create a filesystem instance rooted at the current directory
         let fs: Arc<dyn Filesystem> =
             Arc::new(NativeFilesystem::new(std::env::current_dir().unwrap()));
 
-        // Read a test file and verify its contents
-        let greeting = fs.read_bytes("test_data/hello.txt").unwrap();
+        // Read a test file asynchronously and verify its contents
+        // Using pollster::block_on to wait for the async operation in a sync test
+        let greeting = pollster::block_on(fs.read_bytes("test_data/hello.txt")).unwrap();
         assert_eq!(greeting, b"Hello world\n");
     }
 }
