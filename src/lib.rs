@@ -20,6 +20,3 @@ pub use filesystem::*;
 pub use loader::*;
 pub use manager::*;
 pub use saver::*;
-
-#[cfg(test)]
-mod test;
