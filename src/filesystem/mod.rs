@@ -10,6 +10,9 @@ pub enum FilesystemError {
     /// Standard I/O error occurred.
     #[error("I/O: {0}")]
     Io(#[from] std::io::Error),
+    /// Writing operations are not supported by this filesystem implementation.
+    #[error("Writing is unsupported on this filesystem")]
+    WriteUnsupported,
     /// The requested asset file was not found.
     #[error("Asset not found: {0}")]
     NotFound(String),
@@ -38,4 +41,23 @@ pub trait Filesystem: Send + Sync {
     ///
     /// A future that resolves to the file contents as bytes, or an error if the file could not be read.
     async fn read_bytes(&self, asset_path: &str) -> Result<Vec<u8>, FilesystemError>;
+
+    /// Asynchronously writes raw bytes to an asset file.
+    ///
+    /// This method provides a default implementation that returns `WriteUnsupported`.
+    /// Filesystem implementations that support writing should override this method.
+    ///
+    /// # Arguments
+    ///
+    /// * `asset_path` - The path where the asset file should be written
+    /// * `data` - The raw bytes to write to the file
+    ///
+    /// # Returns
+    ///
+    /// A future that resolves to success or an error if the write operation fails.
+    /// The default implementation always returns `WriteUnsupported`.
+    #[allow(unused_variables)]
+    async fn write_bytes(&self, asset_path: &str, data: &[u8]) -> Result<(), FilesystemError> {
+        Err(FilesystemError::WriteUnsupported)
+    }
 }
