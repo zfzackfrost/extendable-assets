@@ -82,14 +82,22 @@ impl AssetManager {
         let assets = self.assets.lock();
         assets.get(&id).cloned()
     }
-    /// Generates a deterministic asset ID from an asset path.
+    /// Encodes an asset path using percent-encoding for URI safety.
     ///
-    /// Uses XXH3 hash with a custom secret to generate consistent IDs
-    /// for the same asset path across application restarts.
+    /// Applies RFC 3986 percent-encoding to asset paths, preserving forward slashes
+    /// and unreserved characters while encoding everything else. This ensures asset
+    /// paths are safe for use in URIs and filesystem operations.
+    ///
+    /// # Arguments
+    ///
+    /// * `asset_path` - The asset path to encode
+    ///
+    /// # Returns
+    ///
+    /// A percent-encoded version of the asset path
     #[inline]
-    fn gen_asset_id(&self, asset_path: &str) -> AssetId {
-        // Encode asset path
-        let asset_path: String = asset_path
+    pub fn encode_asset_path(&self, asset_path: &str) -> String {
+        asset_path
             .chars()
             .map(|c| {
                 match c {
@@ -110,7 +118,15 @@ impl AssetManager {
                     }
                 }
             })
-            .collect();
+            .collect()
+    }
+    /// Generates a deterministic asset ID from an asset path.
+    ///
+    /// Uses XXH3 hash with a custom secret to generate consistent IDs
+    /// for the same asset path across application restarts.
+    #[inline]
+    fn gen_asset_id(&self, asset_path: &str) -> AssetId {
+        let asset_path: String = self.encode_asset_path(asset_path);
 
         const SECRET: [u8; 192] = const_custom_default_secret(1111);
         xxh3_64_with_secret(asset_path.as_bytes(), &SECRET)
