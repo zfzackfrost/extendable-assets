@@ -1,6 +1,7 @@
 mod common;
 use common::*;
 
+use std::path::Path;
 use std::sync::Arc;
 
 use extendable_assets::*;
@@ -8,7 +9,8 @@ use extendable_assets::*;
 fn setup(asset_id_out: Option<&mut AssetId>, asset_type: bool) -> AssetManager {
     std::env::set_current_dir(env!("CARGO_MANIFEST_DIR")).unwrap();
     let cwd = std::env::current_dir().unwrap();
-    let mgr = AssetManager::new(Arc::new(NativeFilesystem::new(cwd)));
+    let tests_dir = Path::new(&cwd).join("tests");
+    let mgr = AssetManager::new(Arc::new(NativeFilesystem::new(tests_dir)));
     if asset_type {
         mgr.register_asset_type(Arc::new(TestAssetType));
     }

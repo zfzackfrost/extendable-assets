@@ -53,13 +53,14 @@ mod test {
     /// Uses pollster to block on the async operation for testing purposes.
     #[test]
     fn read_bytes() {
-        // Create a filesystem instance rooted at the current directory
-        let fs: Arc<dyn Filesystem> =
-            Arc::new(NativeFilesystem::new(std::env::current_dir().unwrap()));
+        let tests_dir = Path::new(&env!("CARGO_MANIFEST_DIR")).join("tests");
+
+        // Create a filesystem instance rooted at the "tests" directory
+        let fs: Arc<dyn Filesystem> = Arc::new(NativeFilesystem::new(tests_dir));
 
         // Read a test file asynchronously and verify its contents
         // Using pollster::block_on to wait for the async operation in a sync test
-        let greeting = pollster::block_on(fs.read_bytes("test_data/hello.txt")).unwrap();
+        let greeting = pollster::block_on(fs.read_bytes("test_data_0/hello.txt")).unwrap();
         assert_eq!(greeting, b"Hello world\n");
     }
 }
