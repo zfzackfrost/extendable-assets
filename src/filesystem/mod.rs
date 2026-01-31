@@ -1,4 +1,7 @@
+mod fallback;
 mod native;
+
+pub use fallback::*;
 pub use native::*;
 
 use async_trait::async_trait;
