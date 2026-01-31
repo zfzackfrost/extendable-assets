@@ -8,29 +8,30 @@ use std::sync::Arc;
 
 use extendable_assets::*;
 
-fn setup(asset_id_out: Option<&mut AssetId>, asset_type: bool) -> AssetManager {
+fn init_mgr() -> AssetManager {
     let tests_dir = Path::new(&env!("CARGO_MANIFEST_DIR")).join("tests");
-    let mgr = AssetManager::new(Arc::new(NativeFilesystem::new(tests_dir)));
-    if asset_type {
-        mgr.register_asset_type(Arc::new(TestAssetType));
-    }
-    if let Some(asset_id_out) = asset_id_out {
-        let data: TestAssetData = rand::rng().random();
-        *asset_id_out = mgr.register_asset(
-            "test_asset_01",
-            Asset::new(
-                mgr.asset_type_by_name("TestAsset")
-                    .expect("Asset type not found"),
-                Box::new(data),
-            ),
-        );
-    }
-    mgr
+    AssetManager::new(Arc::new(NativeFilesystem::new(tests_dir)))
+}
+fn register_types(mgr: &AssetManager) {
+    mgr.register_asset_type(Arc::new(TestAssetType));
+}
+fn register_assets(mgr: &AssetManager) -> AssetId {
+    let data: TestAssetData = rand::rng().random();
+    mgr.register_asset(
+        "test_asset_01",
+        Asset::new(
+            mgr.asset_type_by_name("TestAsset")
+                .expect("Asset type not found"),
+            Box::new(data),
+        ),
+    )
 }
 
 #[test]
 fn register_get_asset_type() {
-    let mgr = setup(None, true);
+    let mgr = init_mgr();
+    register_types(&mgr);
+
     let asset_type = mgr.asset_type_by_name("TestAsset").unwrap();
     let asset_type = asset_type.upgrade().unwrap();
     let name = asset_type.name();
@@ -38,8 +39,10 @@ fn register_get_asset_type() {
 }
 #[test]
 fn register_get_asset() {
-    let mut asset_id: AssetId = 0;
-    let mgr = setup(Some(&mut asset_id), true);
+    let mgr = init_mgr();
+    register_types(&mgr);
+    let asset_id = register_assets(&mgr);
+
     let asset = mgr.asset_by_id(asset_id).unwrap();
     assert_eq!(asset.id(), asset_id);
 }
