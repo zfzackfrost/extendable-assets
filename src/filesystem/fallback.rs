@@ -139,5 +139,9 @@ mod test {
         // goodbye.txt and word.txt should come from the first source that contains them
         assert_eq!(goodbye, b"Goodbye world\n");
         assert_eq!(word, b"assets\n");
+
+        // Test that non-existent files return NotFound error after trying all fallbacks
+        let missing = pollster::block_on(fs.read_bytes("MISSING"));
+        assert!(matches!(missing, Err(FilesystemError::NotFound(_))));
     }
 }
