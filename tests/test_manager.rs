@@ -31,9 +31,7 @@ fn setup(asset_id_out: Option<&mut AssetId>, asset_type: bool) -> AssetManager {
 #[test]
 fn register_get_asset_type() {
     let mgr = setup(None, true);
-    let asset_type = mgr.asset_type_by_name("TestAsset");
-    assert!(asset_type.is_some());
-    let asset_type = asset_type.unwrap();
+    let asset_type = mgr.asset_type_by_name("TestAsset").unwrap();
     let asset_type = asset_type.upgrade().unwrap();
     let name = asset_type.name();
     assert_eq!(name, "TestAsset");
@@ -42,8 +40,6 @@ fn register_get_asset_type() {
 fn register_get_asset() {
     let mut asset_id: AssetId = 0;
     let mgr = setup(Some(&mut asset_id), true);
-    let asset = mgr.asset_by_id(asset_id);
-    assert!(asset.is_some());
-    let asset = asset.unwrap();
+    let asset = mgr.asset_by_id(asset_id).unwrap();
     assert_eq!(asset.id(), asset_id);
 }
