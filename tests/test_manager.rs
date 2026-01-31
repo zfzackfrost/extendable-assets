@@ -6,6 +6,7 @@ use std::sync::Arc;
 use extendable_assets::*;
 
 fn setup(asset_id_out: Option<&mut AssetId>, asset_type: bool) -> AssetManager {
+    std::env::set_current_dir(env!("CARGO_MANIFEST_DIR")).unwrap();
     let cwd = std::env::current_dir().unwrap();
     let mgr = AssetManager::new(Arc::new(NativeFilesystem::new(cwd)));
     if asset_type {
