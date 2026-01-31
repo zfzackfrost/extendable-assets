@@ -1,4 +1,6 @@
 use extendable_assets::*;
+use rand::Rng;
+use rand::distr::{Distribution, StandardUniform};
 
 #[derive(Clone, Debug, PartialEq)]
 #[derive(serde::Deserialize, serde::Serialize)]
@@ -8,6 +10,16 @@ pub struct TestAssetData {
     pub value_c: (u8, u8, u8),
 }
 impl AssetData for TestAssetData {}
+
+impl Distribution<TestAssetData> for StandardUniform {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> TestAssetData {
+        TestAssetData {
+            value_a: rng.random(),
+            value_b: rng.random(),
+            value_c: (rng.random(), rng.random(), rng.random()),
+        }
+    }
+}
 
 #[allow(dead_code)]
 pub struct TestAssetType;
