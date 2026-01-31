@@ -1,7 +1,9 @@
 mod fallback;
-mod native;
-
 pub use fallback::*;
+
+#[cfg(feature = "fs-native")]
+mod native;
+#[cfg(feature = "fs-native")]
 pub use native::*;
 
 use async_trait::async_trait;
