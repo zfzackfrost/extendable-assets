@@ -1,9 +1,12 @@
 mod data;
+mod serialize;
+
 pub use data::*;
+pub use serialize::*;
 
 use std::sync::Weak;
 
-use crate::asset_type::AssetType;
+use crate::{AssetManager, asset_type::AssetType};
 
 /// Unique identifier for assets in the system.
 pub type AssetId = u64;
@@ -39,6 +42,38 @@ impl Asset {
             asset_type,
             data,
         }
+    }
+    /// Creates an asset from a serialized representation.
+    ///
+    /// This method reconstructs an asset from its serialized form by looking up
+    /// the asset type from the manager and deserializing the data using the
+    /// appropriate loader.
+    ///
+    /// # Arguments
+    ///
+    /// * `mgr` - The asset manager to use for type lookup
+    /// * `serialized` - The serialized asset data
+    ///
+    /// # Returns
+    ///
+    /// `Some(Asset)` if deserialization succeeds, `None` if the asset type
+    /// is not found or deserialization fails.
+    pub fn from_serialized(mgr: &AssetManager, serialized: SerializedAsset) -> Option<Self> {
+        // Extract the asset ID from serialized data
+        let id = serialized.id;
+        // Look up the asset type by name in the manager
+        let asset_type = mgr.asset_type_by_name(&serialized.asset_type)?;
+        // Upgrade the weak reference to ensure the asset type is still valid
+        let asset_type_ptr = asset_type.upgrade()?;
+        // Get the serialized data bytes
+        let data_bytes = serialized.data;
+        // Use the asset type's loader to deserialize the data
+        let data = asset_type_ptr.loader().asset_from_bytes(&data_bytes).ok()?;
+        Some(Self {
+            id,
+            asset_type,
+            data,
+        })
     }
     /// Returns the unique identifier for this asset.
     #[inline]
