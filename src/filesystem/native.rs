@@ -24,6 +24,13 @@ impl NativeFilesystem {
             root_dir: PathBuf::from(root_dir.as_ref()),
         }
     }
+
+    /// Returns a reference to the root directory path.
+    ///
+    /// This is the directory that all asset paths are resolved relative to.
+    pub fn root_dir(&self) -> &Path {
+        &self.root_dir
+    }
 }
 #[async_trait]
 impl Filesystem for NativeFilesystem {
