@@ -13,18 +13,38 @@ use crate::manager::AssetManager;
 /// Unique identifier for assets in the system.
 pub type AssetId = u64;
 
+/// Errors that can occur during asset operations.
+///
+/// This enum represents all possible errors that can happen when working with assets,
+/// including loading, type resolution, and general asset manipulation.
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum AssetError {
+    /// Error occurred during asset loading from bytes.
+    ///
+    /// This variant wraps loader-specific errors that can happen when attempting
+    /// to deserialize asset data from raw bytes using an asset type's loader.
     #[error("Error loading asset data from bytes: {0}")]
     Loader(#[from] AssetLoadError),
 
+    /// The asset type reference has been dropped and is no longer available.
+    ///
+    /// This error occurs when trying to access an asset type through a weak reference
+    /// that can no longer be upgraded because the asset type has been dropped from memory.
     #[error("A weak pointer to an AssetType could not be upgraded")]
     TypeDropped,
 
+    /// The specified asset type could not be found in the asset manager.
+    ///
+    /// This error occurs when attempting to look up an asset type by name that
+    /// is not registered in the asset manager.
     #[error("Asset type was not found: {0}")]
     TypeNotFound(String),
 
+    /// Any other error that doesn't fit into the specific categories above.
+    ///
+    /// This is a catch-all variant for wrapping other error types that may
+    /// occur during asset operations.
     #[error(transparent)]
     Other(#[from] anyhow::Error),
 }
@@ -73,7 +93,7 @@ impl Asset {
     ///
     /// # Returns
     ///
-    /// `Ok(Asset)` if deserialization succeeds, `Err(AssetManagerError)` if the asset type
+    /// `Ok(Asset)` if deserialization succeeds, `Err(AssetError)` if the asset type
     /// is not found or deserialization fails.
     pub fn from_serialized(
         mgr: &AssetManager,
