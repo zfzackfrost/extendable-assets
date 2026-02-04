@@ -6,10 +6,28 @@ pub use serialize::*;
 
 use std::sync::Weak;
 
-use crate::{AssetManager, asset_type::AssetType};
+use crate::asset_type::AssetType;
+use crate::loader::AssetLoadError;
+use crate::manager::AssetManager;
 
 /// Unique identifier for assets in the system.
 pub type AssetId = u64;
+
+#[derive(Debug, thiserror::Error)]
+#[non_exhaustive]
+pub enum AssetError {
+    #[error("Error loading asset data from bytes: {0}")]
+    Loader(#[from] AssetLoadError),
+
+    #[error("A weak pointer to an AssetType could not be upgraded")]
+    TypeDropped,
+
+    #[error("Asset type was not found: {0}")]
+    TypeNotFound(String),
+
+    #[error(transparent)]
+    Other(#[from] anyhow::Error),
+}
 
 /// An asset containing type information and data.
 ///
@@ -27,8 +45,7 @@ pub struct Asset {
 impl Asset {
     /// Creates a new asset with the given type and data.
     ///
-    /// The asset ID is initially set to 0 and will be assigned by the asset manager
-    /// when the asset is registered.
+    /// The asset ID is initially set to 0 and will be assigned by the asset manager when the asset is registered.
     ///
     /// # Arguments
     ///
@@ -56,20 +73,28 @@ impl Asset {
     ///
     /// # Returns
     ///
-    /// `Some(Asset)` if deserialization succeeds, `None` if the asset type
+    /// `Ok(Asset)` if deserialization succeeds, `Err(AssetManagerError)` if the asset type
     /// is not found or deserialization fails.
-    pub fn from_serialized(mgr: &AssetManager, serialized: SerializedAsset) -> Option<Self> {
+    pub fn from_serialized(
+        mgr: &AssetManager,
+        serialized: SerializedAsset,
+    ) -> Result<Self, AssetError> {
         // Extract the asset ID from serialized data
         let id = serialized.id;
         // Look up the asset type by name in the manager
-        let asset_type = mgr.asset_type_by_name(&serialized.asset_type)?;
+        let asset_type = mgr
+            .asset_type_by_name(&serialized.asset_type)
+            .ok_or_else(|| AssetError::TypeNotFound(serialized.asset_type))?;
         // Upgrade the weak reference to ensure the asset type is still valid
-        let asset_type_ptr = asset_type.upgrade()?;
+        let asset_type_ptr = asset_type.upgrade().ok_or(AssetError::TypeDropped)?;
         // Get the serialized data bytes
         let data_bytes = serialized.data;
         // Use the asset type's loader to deserialize the data
-        let data = asset_type_ptr.loader().asset_from_bytes(&data_bytes).ok()?;
-        Some(Self {
+        let data = asset_type_ptr
+            .loader()
+            .asset_from_bytes(&data_bytes)
+            .map_err(AssetError::from)?;
+        Ok(Self {
             id,
             asset_type,
             data,
