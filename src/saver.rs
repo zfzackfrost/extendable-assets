@@ -1,4 +1,7 @@
+use std::sync::Arc;
+
 use crate::asset::AssetData;
+use crate::manager::AssetManagerContext;
 
 use thiserror::Error;
 
@@ -33,5 +36,9 @@ pub trait AssetSaver {
     /// # Returns
     ///
     /// The serialized byte data on success, or an error if saving failed.
-    fn asset_to_bytes(&self, asset: &dyn AssetData) -> Result<Vec<u8>, AssetSaveError>;
+    fn asset_to_bytes(
+        &self,
+        asset: &dyn AssetData,
+        context: Option<Arc<dyn AssetManagerContext>>,
+    ) -> Result<Vec<u8>, AssetSaveError>;
 }

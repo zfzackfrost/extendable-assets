@@ -112,7 +112,7 @@ impl Asset {
         // Use the asset type's loader to deserialize the data
         let data = asset_type_ptr
             .loader()
-            .asset_from_bytes(&data_bytes)
+            .asset_from_bytes(&data_bytes, mgr.context())
             .map_err(AssetError::from)?;
         Ok(Self {
             id,

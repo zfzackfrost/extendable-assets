@@ -1,4 +1,7 @@
+use std::sync::Arc;
+
 use crate::asset::AssetData;
+use crate::manager::AssetManagerContext;
 
 use thiserror::Error;
 
@@ -29,5 +32,9 @@ pub trait AssetLoader {
     /// # Returns
     ///
     /// The loaded asset data on success, or an error if loading failed.
-    fn asset_from_bytes(&self, bytes: &[u8]) -> Result<Box<dyn AssetData>, AssetLoadError>;
+    fn asset_from_bytes(
+        &self,
+        bytes: &[u8],
+        context: Option<Arc<dyn AssetManagerContext>>,
+    ) -> Result<Box<dyn AssetData>, AssetLoadError>;
 }

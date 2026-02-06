@@ -15,7 +15,10 @@ fn from_serialized() {
         .expect("Asset type not found");
     let asset_type = asset_type.upgrade().unwrap();
     let asset_data: TestAssetData = rand::rng().random();
-    let asset_data_bytes = asset_type.saver().asset_to_bytes(&asset_data).unwrap();
+    let asset_data_bytes = asset_type
+        .saver()
+        .asset_to_bytes(&asset_data, mgr.context())
+        .unwrap();
 
     let serialized = SerializedAsset {
         asset_type: "TestAsset".into(),

@@ -33,7 +33,11 @@ impl AssetType for TestAssetType {
     fn loader(&self) -> Box<dyn AssetLoader> {
         struct Loader;
         impl AssetLoader for Loader {
-            fn asset_from_bytes(&self, bytes: &[u8]) -> Result<Box<dyn AssetData>, AssetLoadError> {
+            fn asset_from_bytes(
+                &self,
+                bytes: &[u8],
+                _context: Option<Arc<dyn AssetManagerContext>>,
+            ) -> Result<Box<dyn AssetData>, AssetLoadError> {
                 let data: TestAssetData = rmp_serde::from_slice(bytes)
                     .map_err(|e| AssetLoadError::Deserialization(anyhow::Error::new(e)))?;
                 Ok(Box::new(data))
@@ -45,7 +49,11 @@ impl AssetType for TestAssetType {
     fn saver(&self) -> Box<dyn AssetSaver> {
         struct Saver;
         impl AssetSaver for Saver {
-            fn asset_to_bytes(&self, asset: &dyn AssetData) -> Result<Vec<u8>, AssetSaveError> {
+            fn asset_to_bytes(
+                &self,
+                asset: &dyn AssetData,
+                _context: Option<Arc<dyn AssetManagerContext>>,
+            ) -> Result<Vec<u8>, AssetSaveError> {
                 let data = asset
                     .downcast_ref::<TestAssetData>()
                     .ok_or(AssetSaveError::UnsupportedType)?;
