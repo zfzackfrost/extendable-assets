@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::sync::{Arc, Weak};
 
+use downcast_rs::{DowncastSync, impl_downcast};
 use parking_lot::Mutex;
 
 use xxhash_rust::const_xxh3::const_custom_default_secret;
@@ -25,6 +26,8 @@ pub struct AssetManager {
     assets: Mutex<U64HashMap<Arc<Asset>>>,
     /// Filesystem abstraction for reading and writing asset files
     filesystem: Arc<dyn Filesystem>,
+    /// Optional context for providing additional state to the asset manager
+    context: Option<Arc<dyn AssetManagerContext>>,
 }
 impl AssetManager {
     /// Creates a new asset manager with the provided filesystem.
@@ -38,7 +41,27 @@ impl AssetManager {
             asset_types: Mutex::new(HashMap::default()),
             assets: Mutex::new(HashMap::default()),
             filesystem,
+            context: None,
         }
+    }
+
+    /// Retrieves the current asset manager context.
+    ///
+    /// # Returns
+    ///
+    /// The context if one has been set, otherwise `None`.
+    #[inline]
+    pub fn context(&self) -> Option<Arc<dyn AssetManagerContext>> {
+        self.context.clone()
+    }
+    /// Sets the asset manager context.
+    ///
+    /// # Arguments
+    ///
+    /// * `context` - The context implementation to set
+    #[inline]
+    pub fn set_context(&mut self, context: Arc<dyn AssetManagerContext>) {
+        self.context = Some(context);
     }
 
     /// Retrieves an asset type by its name.
@@ -168,3 +191,10 @@ impl AssetManager {
         self.filesystem.read_bytes(asset_path).await
     }
 }
+
+/// Trait for providing additional context to the asset manager.
+///
+/// This trait allows extending the asset manager with custom state
+/// while maintaining type safety through downcasting capabilities.
+pub trait AssetManagerContext: DowncastSync {}
+impl_downcast!(sync AssetManagerContext);
