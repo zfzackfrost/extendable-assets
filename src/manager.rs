@@ -174,6 +174,23 @@ impl AssetManager {
         id
     }
 
+    /// Unregisters an asset from the manager.
+    ///
+    /// Removes the asset with the given ID from the manager's storage.
+    /// The asset will no longer be accessible through the manager after this call.
+    /// The asset will be de-allocated when all Arc references to it are dropped.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The unique identifier of the asset to remove
+    ///
+    /// # Returns
+    ///
+    /// `true` if the asset was found and removed, `false` if no asset with that ID existed.
+    pub fn unregister_asset(&self, id: AssetId) -> bool {
+        self.assets.lock().remove(&id).is_some()
+    }
+
     /// Asynchronously reads the raw bytes of a file from the filesystem.
     ///
     /// This is a convenience method that delegates to the underlying filesystem
