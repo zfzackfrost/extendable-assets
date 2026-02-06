@@ -1,6 +1,11 @@
 mod fallback;
 pub use fallback::*;
 
+#[cfg(feature = "fs-embed")]
+mod embed;
+#[cfg(feature = "fs-embed")]
+pub use embed::*;
+
 #[cfg(feature = "fs-native")]
 mod native;
 #[cfg(feature = "fs-native")]
