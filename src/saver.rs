@@ -29,13 +29,25 @@ pub enum AssetSaveError {
 pub trait AssetSaver {
     /// Converts asset data into raw bytes.
     ///
+    /// This method is called by the asset manager when an asset needs to be
+    /// saved to persistent storage or transmitted over the network.
+    ///
     /// # Arguments
     ///
-    /// * `asset` - The asset data to serialize
+    /// * `asset` - The asset data to serialize into bytes
+    /// * `context` - Optional context providing access to asset manager state
+    ///   and configuration during the saving process
     ///
     /// # Returns
     ///
     /// The serialized byte data on success, or an error if saving failed.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if:
+    /// * The asset type is not supported by this saver
+    /// * Serialization of the asset data fails
+    /// * Any other error occurs during the saving process
     fn asset_to_bytes(
         &self,
         asset: &dyn AssetData,

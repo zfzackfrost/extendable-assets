@@ -25,13 +25,25 @@ pub enum AssetLoadError {
 pub trait AssetLoader {
     /// Converts raw bytes into asset data.
     ///
+    /// This method is called by the asset manager when raw asset data needs to be
+    /// deserialized into a typed asset object that can be used by the application.
+    ///
     /// # Arguments
     ///
-    /// * `bytes` - The raw byte data to deserialize
+    /// * `bytes` - The raw byte data to deserialize into an asset
+    /// * `context` - Optional context providing access to asset manager state
+    ///   and configuration during the loading process
     ///
     /// # Returns
     ///
     /// The loaded asset data on success, or an error if loading failed.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if:
+    /// * Deserialization of the byte data fails
+    /// * The data format is invalid or corrupted
+    /// * Any other error occurs during the loading process
     fn asset_from_bytes(
         &self,
         bytes: &[u8],
