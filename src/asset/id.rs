@@ -1,12 +1,21 @@
 use rand::Rng;
 use rand::distr::{Distribution, StandardUniform};
 
+use std::hash::Hash;
+
 #[derive(Clone, Copy)]
 #[derive(PartialEq, PartialOrd, Ord, Eq)]
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(transparent)]
 #[repr(transparent)]
 pub struct AssetId(u64);
+
+impl Hash for AssetId {
+    #[inline]
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        state.write_u64(self.0)
+    }
+}
 
 impl From<AssetId> for u64 {
     #[inline]
