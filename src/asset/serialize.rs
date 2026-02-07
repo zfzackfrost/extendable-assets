@@ -20,7 +20,6 @@ pub struct SerializedAsset {
     pub data: Vec<u8>,
 }
 
-#[cfg(test)]
 impl PartialEq for SerializedAsset {
     /// Compares two SerializedAsset instances for equality.
     ///
