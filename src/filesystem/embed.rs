@@ -28,6 +28,7 @@ pub trait EmbedFilesystemProvider: Send + Sync {
 pub struct EmbedFilesystem {
     /// The provider that handles access to the embedded files
     provider: Box<dyn EmbedFilesystemProvider>,
+    root_dir: String,
 }
 impl EmbedFilesystem {
     /// Creates a new embedded filesystem with the given provider.
@@ -41,7 +42,18 @@ impl EmbedFilesystem {
     /// A new `EmbedFilesystem` instance.
     #[inline]
     pub fn new(provider: Box<dyn EmbedFilesystemProvider>) -> Self {
-        Self { provider }
+        Self {
+            provider,
+            root_dir: String::new(),
+        }
+    }
+    pub fn with_root_dir(mut self, root_dir: &str) -> Self {
+        self.root_dir = if root_dir.is_empty() {
+            String::new()
+        } else {
+            root_dir.trim_end_matches(['/', '\\']).to_string() + "/"
+        };
+        self
     }
 }
 #[async_trait]
@@ -62,11 +74,12 @@ impl Filesystem for EmbedFilesystem {
     /// Returns `FilesystemError::NotFound` if the requested file path
     /// does not exist in the embedded files.
     async fn read_bytes(&self, asset_path: &str) -> Result<Vec<u8>, FilesystemError> {
+        let prefixed_path = self.root_dir.clone() + asset_path;
         // Look up the embedded file using the provider
         let embedded = self
             .provider
-            .get(asset_path)
-            .ok_or_else(|| FilesystemError::NotFound(asset_path.to_string()))?;
+            .get(&prefixed_path)
+            .ok_or_else(|| FilesystemError::NotFound(prefixed_path))?;
 
         // Convert the embedded file data to owned bytes
         Ok(embedded.data.into_owned())
@@ -108,5 +121,19 @@ mod test {
         // Read the test file contents and verify they match expected value
         let greeting = pollster::block_on(fs.read_bytes("test_data_0/hello.txt")).unwrap();
         assert_eq!(greeting, b"Hello world\n");
+    }
+
+    #[test]
+    fn read_bytes_with_root() {
+        // Create an embedded filesystem using our test provider
+        // Add a root directory, with a bunch of slashes at the end (they should be removed
+        // automatically)
+        let fs: Arc<dyn Filesystem> = Arc::new(
+            EmbedFilesystem::new(Box::new(TestEmbedFsProvider)).with_root_dir("test_data_1///"),
+        );
+
+        // Read the test file contents and verify they match expected value
+        let greeting = pollster::block_on(fs.read_bytes("hello.txt")).unwrap();
+        assert_eq!(greeting, b"Hello earth\n");
     }
 }
