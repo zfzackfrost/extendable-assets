@@ -23,7 +23,7 @@ pub struct AssetManager {
     /// Registry of asset types by their string names
     asset_types: Mutex<HashMap<String, Arc<dyn AssetType>>>,
     /// Storage for loaded assets indexed by their unique IDs
-    assets: Mutex<U64HashMap<Arc<Asset>>>,
+    assets: Mutex<U64HashMap<AssetId, Arc<Asset>>>,
     /// Filesystem abstraction for reading and writing asset files
     filesystem: Arc<dyn Filesystem>,
     /// Optional context for providing additional state to the asset manager
@@ -103,7 +103,7 @@ impl AssetManager {
     #[inline]
     pub fn asset_by_id(&self, id: AssetId) -> Option<Arc<Asset>> {
         let assets = self.assets.lock();
-        assets.get(&id.into()).cloned()
+        assets.get(&id).cloned()
     }
     /// Encodes an asset path using percent-encoding for URI safety.
     ///
@@ -170,7 +170,7 @@ impl AssetManager {
     pub fn register_asset(&self, asset_path: &str, mut asset: Asset) -> AssetId {
         let id = self.gen_asset_id(asset_path);
         asset.set_id(id);
-        self.assets.lock().insert(id.into(), Arc::new(asset));
+        self.assets.lock().insert(id, Arc::new(asset));
         id
     }
 
@@ -188,7 +188,7 @@ impl AssetManager {
     ///
     /// `true` if the asset was found and removed, `false` if no asset with that ID existed.
     pub fn unregister_asset(&self, id: AssetId) -> bool {
-        self.assets.lock().remove(&id.into()).is_some()
+        self.assets.lock().remove(&id).is_some()
     }
 
     /// Asynchronously reads the raw bytes of a file from the filesystem.

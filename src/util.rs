@@ -34,7 +34,7 @@ pub(crate) type U64HahserBuilder = BuildHasherDefault<U64Hasher>;
 /// A HashMap optimized for u64 keys using the specialized U64Hasher.
 ///
 /// This provides better performance for asset ID lookups compared to the default hasher.
-pub(crate) type U64HashMap<V> = HashMap<u64, V, U64HahserBuilder>;
+pub(crate) type U64HashMap<K, V> = HashMap<K, V, U64HahserBuilder>;
 
 #[cfg(test)]
 mod test {
@@ -52,7 +52,7 @@ mod test {
 
         // Create a hash map with our optimized hasher
         let mut hash_map =
-            U64HashMap::<u8>::with_capacity_and_hasher(1 << 16, U64HahserBuilder::new());
+            U64HashMap::<u64, u8>::with_capacity_and_hasher(1 << 16, U64HahserBuilder::new());
 
         for n in nums {
             // Insert a random value for each key
