@@ -39,3 +39,16 @@ impl Distribution<AssetId> for StandardUniform {
         AssetId(rng.random())
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use serde_test::{Token, assert_tokens};
+
+    #[test]
+    fn asset_id_serde() {
+        let id: AssetId = rand::rng().random();
+        let id_value: u64 = id.into();
+        assert_tokens(&id, &[Token::U64(id_value)]);
+    }
+}
