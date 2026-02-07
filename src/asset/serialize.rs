@@ -65,7 +65,7 @@ mod test {
                 len: 3,
             },
             Token::Str("id"),
-            Token::U64(asset.id),
+            Token::U64(asset.id.into()),
             Token::Str("asset_type"),
             Token::String("TestAsset"),
             Token::Str("data"),

@@ -103,7 +103,7 @@ impl AssetManager {
     #[inline]
     pub fn asset_by_id(&self, id: AssetId) -> Option<Arc<Asset>> {
         let assets = self.assets.lock();
-        assets.get(&id).cloned()
+        assets.get(&id.into()).cloned()
     }
     /// Encodes an asset path using percent-encoding for URI safety.
     ///
@@ -152,7 +152,7 @@ impl AssetManager {
         let asset_path: String = self.encode_asset_path(asset_path);
 
         const SECRET: [u8; 192] = const_custom_default_secret(1111);
-        xxh3_64_with_secret(asset_path.as_bytes(), &SECRET)
+        xxh3_64_with_secret(asset_path.as_bytes(), &SECRET).into()
     }
     /// Registers an asset with the manager and assigns it a deterministic ID.
     ///
@@ -170,7 +170,7 @@ impl AssetManager {
     pub fn register_asset(&self, asset_path: &str, mut asset: Asset) -> AssetId {
         let id = self.gen_asset_id(asset_path);
         asset.set_id(id);
-        self.assets.lock().insert(id, Arc::new(asset));
+        self.assets.lock().insert(id.into(), Arc::new(asset));
         id
     }
 
@@ -188,7 +188,7 @@ impl AssetManager {
     ///
     /// `true` if the asset was found and removed, `false` if no asset with that ID existed.
     pub fn unregister_asset(&self, id: AssetId) -> bool {
-        self.assets.lock().remove(&id).is_some()
+        self.assets.lock().remove(&id.into()).is_some()
     }
 
     /// Asynchronously reads the raw bytes of a file from the filesystem.

@@ -1,7 +1,9 @@
 mod data;
+mod id;
 mod serialize;
 
 pub use data::*;
+pub use id::*;
 pub use serialize::*;
 
 use std::sync::Weak;
@@ -9,9 +11,6 @@ use std::sync::Weak;
 use crate::asset_type::AssetType;
 use crate::loader::AssetLoadError;
 use crate::manager::AssetManager;
-
-/// Unique identifier for assets in the system.
-pub type AssetId = u64;
 
 /// Errors that can occur during asset operations.
 ///
@@ -75,7 +74,7 @@ impl Asset {
     pub fn new(asset_type: Weak<dyn AssetType>, data: Box<dyn AssetData>) -> Self {
         Self {
             // ID will be set by the asset manager during registration
-            id: 0,
+            id: AssetId::from(0),
             asset_type,
             data,
         }
