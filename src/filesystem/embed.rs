@@ -72,3 +72,41 @@ impl Filesystem for EmbedFilesystem {
         Ok(embedded.data.into_owned())
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use std::sync::Arc;
+
+    /// Test implementation of EmbedFilesystemProvider
+    #[derive(rust_embed::Embed)]
+    #[folder = "$CARGO_MANIFEST_DIR/tests"]
+    struct TestEmbedFsProvider;
+    impl EmbedFilesystemProvider for TestEmbedFsProvider {
+        /// Retrieves an embedded test file by its path.
+        fn get(&self, path: &str) -> Option<EmbeddedFile> {
+            // Delegate to the rust-embed generated static method
+            TestEmbedFsProvider::get(path)
+        }
+    }
+
+    /// Test that the embedded filesystem can successfully read file contents.
+    ///
+    /// This test verifies that:
+    /// 1. The EmbedFilesystem can be constructed with a test provider
+    /// 2. The filesystem can locate and read an embedded test file
+    /// 3. The file contents are returned correctly as bytes
+    /// 4. The async interface works properly with pollster for blocking execution
+    ///
+    /// The test uses a known test file `test_data_0/hello.txt` that should
+    /// contain the text "Hello world\n" to verify the read operation.
+    #[test]
+    fn read_bytes() {
+        // Create an embedded filesystem using our test provider
+        let fs: Arc<dyn Filesystem> = Arc::new(EmbedFilesystem::new(Box::new(TestEmbedFsProvider)));
+
+        // Read the test file contents and verify they match expected value
+        let greeting = pollster::block_on(fs.read_bytes("test_data_0/hello.txt")).unwrap();
+        assert_eq!(greeting, b"Hello world\n");
+    }
+}
