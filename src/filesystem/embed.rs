@@ -28,6 +28,9 @@ pub trait EmbedFilesystemProvider: Send + Sync {
 pub struct EmbedFilesystem {
     /// The provider that handles access to the embedded files
     provider: Box<dyn EmbedFilesystemProvider>,
+    /// Optional root directory prefix to prepend to all file paths.
+    /// When set, all file lookups will be prefixed with this directory path.
+    /// Trailing slashes are automatically normalized.
     root_dir: String,
 }
 impl EmbedFilesystem {
@@ -47,6 +50,32 @@ impl EmbedFilesystem {
             root_dir: String::new(),
         }
     }
+    /// Sets the root directory for this filesystem.
+    ///
+    /// When a root directory is set, all file path lookups will be prefixed
+    /// with this directory path. Trailing slashes and backslashes are
+    /// automatically normalized to ensure consistent path formatting.
+    ///
+    /// # Arguments
+    ///
+    /// * `root_dir` - The root directory path to use as a prefix
+    ///
+    /// # Returns
+    ///
+    /// Self with the root directory configured
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use extendable_assets::EmbedFilesystem;
+    /// # use extendable_assets::EmbedFilesystemProvider;
+    /// struct MockProvider;
+    /// impl EmbedFilesystemProvider for MockProvider {
+    ///     fn get(&self, _path: &str) -> Option<rust_embed::EmbeddedFile> { None }
+    /// }
+    /// let fs = EmbedFilesystem::new(Box::new(MockProvider))
+    ///     .with_root_dir("assets/");
+    /// ```
     pub fn with_root_dir(mut self, root_dir: &str) -> Self {
         self.root_dir = if root_dir.is_empty() {
             String::new()
@@ -91,7 +120,11 @@ mod test {
     use super::*;
     use std::sync::Arc;
 
-    /// Test implementation of EmbedFilesystemProvider
+    /// Test implementation of EmbedFilesystemProvider that embeds test files.
+    ///
+    /// This struct uses the `rust_embed::Embed` derive macro to embed all files
+    /// from the `tests/` directory at compile time, making them available for
+    /// testing the embedded filesystem functionality.
     #[derive(rust_embed::Embed)]
     #[folder = "$CARGO_MANIFEST_DIR/tests"]
     struct TestEmbedFsProvider;
@@ -123,6 +156,16 @@ mod test {
         assert_eq!(greeting, b"Hello world\n");
     }
 
+    /// Test that the embedded filesystem works correctly with a root directory.
+    ///
+    /// This test verifies that:
+    /// 1. The root directory feature works correctly with trailing slashes
+    /// 2. Path normalization removes excess trailing slashes
+    /// 3. Files can be accessed using relative paths when a root is set
+    /// 4. The correct file contents are returned from the prefixed path
+    ///
+    /// The test uses `test_data_1/hello.txt` as the target file by setting
+    /// `test_data_1` as the root directory and accessing `hello.txt` directly.
     #[test]
     fn read_bytes_with_root() {
         // Create an embedded filesystem using our test provider
