@@ -30,7 +30,9 @@ impl FallbackFilesystem {
     ///
     /// # Example
     ///
-    /// ```ignore
+    /// ```
+    /// # use extendable_assets::{ FallbackFilesystem, NativeFilesystem };
+    /// # use std::sync::Arc;
     /// let mod_fs = Arc::new(NativeFilesystem::new("mods/"));
     /// let base_fs = Arc::new(NativeFilesystem::new("assets/"));
     /// let fallback = FallbackFilesystem::new(vec![mod_fs, base_fs]);
