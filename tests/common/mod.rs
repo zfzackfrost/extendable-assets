@@ -43,7 +43,7 @@ impl AssetType for TestAssetType {
                 bytes: &[u8],
                 _context: Option<Arc<dyn AssetManagerContext>>,
             ) -> Result<Box<dyn AssetData>, AssetLoadError> {
-                let data: TestAssetData = rmp_serde::from_slice(bytes)
+                let data: TestAssetData = serde_json::from_slice(bytes)
                     .map_err(|e| AssetLoadError::Deserialization(anyhow::Error::new(e)))?;
                 Ok(Box::new(data))
             }
@@ -62,7 +62,7 @@ impl AssetType for TestAssetType {
                 let data = asset
                     .downcast_ref::<TestAssetData>()
                     .ok_or(AssetSaveError::UnsupportedType)?;
-                rmp_serde::to_vec(&data)
+                serde_json::to_vec(&data)
                     .map_err(|e| AssetSaveError::Serialization(anyhow::Error::new(e)))
             }
         }

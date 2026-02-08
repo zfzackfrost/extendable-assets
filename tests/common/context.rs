@@ -32,7 +32,7 @@ impl AssetType for TestContextAssetType {
                 bytes: &[u8],
                 context: Option<Arc<dyn AssetManagerContext>>,
             ) -> Result<Box<dyn AssetData>, AssetLoadError> {
-                let mut data: TestContextAssetData = rmp_serde::from_slice(bytes)
+                let mut data: TestContextAssetData = serde_json::from_slice(bytes)
                     .map_err(|e| AssetLoadError::Deserialization(anyhow::Error::new(e)))?;
 
                 let context = context.unwrap();
@@ -62,7 +62,7 @@ impl AssetType for TestContextAssetType {
                 let data = asset
                     .downcast_ref::<TestContextAssetData>()
                     .ok_or(AssetSaveError::UnsupportedType)?;
-                rmp_serde::to_vec(&data)
+                serde_json::to_vec(&data)
                     .map_err(|e| AssetSaveError::Serialization(anyhow::Error::new(e)))
             }
         }
