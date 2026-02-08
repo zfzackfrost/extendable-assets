@@ -4,6 +4,7 @@ pub use context::*;
 
 use extendable_assets::*;
 use rand::Rng;
+use rand::RngExt;
 use rand::distr::{Distribution, StandardUniform};
 
 use std::path::Path;

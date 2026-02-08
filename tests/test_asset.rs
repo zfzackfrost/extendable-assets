@@ -1,7 +1,7 @@
 mod common;
 use common::*;
 
-use rand::Rng;
+use rand::RngExt;
 
 use extendable_assets::*;
 

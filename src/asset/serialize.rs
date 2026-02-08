@@ -32,7 +32,7 @@ impl PartialEq for SerializedAsset {
 #[cfg(test)]
 mod test {
     use super::*;
-    use rand::Rng;
+    use rand::RngExt;
     use serde_test::{Token, assert_tokens};
     use std::sync::LazyLock;
 
