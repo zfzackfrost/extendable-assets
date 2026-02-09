@@ -24,9 +24,9 @@ impl AssetType for TestContextAssetType {
     fn name(&self) -> &str {
         "TestContextAsset"
     }
-    fn loader(&self) -> Box<dyn AssetLoader> {
+    fn loader(&self) -> Box<dyn AssetDataLoader> {
         struct Loader;
-        impl AssetLoader for Loader {
+        impl AssetDataLoader for Loader {
             fn asset_from_bytes(
                 &self,
                 bytes: &[u8],
@@ -46,9 +46,9 @@ impl AssetType for TestContextAssetType {
         Box::new(Loader)
     }
 
-    fn saver(&self) -> Box<dyn AssetSaver> {
+    fn saver(&self) -> Box<dyn AssetDataSaver> {
         struct Saver;
-        impl AssetSaver for Saver {
+        impl AssetDataSaver for Saver {
             fn asset_to_bytes(
                 &self,
                 asset: &dyn AssetData,

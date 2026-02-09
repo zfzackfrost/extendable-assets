@@ -18,11 +18,11 @@ pub enum AssetLoadError {
     Other(anyhow::Error),
 }
 
-/// Trait for loading assets from raw byte data.
+/// Trait for loading asset data from raw byte data.
 ///
-/// Asset loaders are responsible for converting raw bytes (typically read from files)
+/// Asset data loaders are responsible for converting raw bytes (typically read from files)
 /// into typed asset data that can be used by the application.
-pub trait AssetLoader {
+pub trait AssetDataLoader {
     /// Converts raw bytes into asset data.
     ///
     /// This method is called by the asset manager when raw asset data needs to be

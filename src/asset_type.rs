@@ -1,5 +1,5 @@
-use crate::loader::AssetLoader;
-use crate::saver::AssetSaver;
+use crate::loader::AssetDataLoader;
+use crate::saver::AssetDataSaver;
 
 /// Defines how a specific type of asset should be loaded and saved.
 ///
@@ -12,10 +12,10 @@ pub trait AssetType: Send + Sync {
     /// Creates a new loader instance for this asset type.
     ///
     /// The loader is responsible for converting raw bytes into asset data.
-    fn loader(&self) -> Box<dyn AssetLoader>;
+    fn loader(&self) -> Box<dyn AssetDataLoader>;
 
     /// Creates a new saver instance for this asset type.
     ///
     /// The saver is responsible for converting asset data back to raw bytes.
-    fn saver(&self) -> Box<dyn AssetSaver>;
+    fn saver(&self) -> Box<dyn AssetDataSaver>;
 }

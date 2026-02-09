@@ -22,11 +22,11 @@ pub enum AssetSaveError {
     Other(anyhow::Error),
 }
 
-/// Trait for saving assets to raw byte data.
+/// Trait for saving asset data to raw byte data.
 ///
 /// Asset savers are responsible for converting typed asset data back into raw bytes
 /// that can be written to files or transmitted over the network.
-pub trait AssetSaver {
+pub trait AssetDataSaver {
     /// Converts asset data into raw bytes.
     ///
     /// This method is called by the asset manager when an asset needs to be
