@@ -1,6 +1,11 @@
 mod backend;
 pub use backend::*;
 
+#[cfg(feature = "backend-json")]
+mod json_backend;
+#[cfg(feature = "backend-json")]
+pub use json_backend::*;
+
 use serde::{Deserialize, Serialize};
 
 use crate::asset::AssetId;
