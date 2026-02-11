@@ -204,20 +204,12 @@ impl AssetManager {
         let bytes = self.fs_read_bytes(asset_path).await?;
 
         // Deserialize the bytes into a SerializedAsset structure
-        let mut serialized = self.serialization.deserialize(&bytes[..])?;
-
-        // Generate a deterministic ID if the asset doesn't have one
-        if serialized.id == AssetId::from(0) {
-            serialized.id = AssetId::from(asset_path);
-        }
+        let serialized = self.serialization.deserialize(&bytes[..])?;
 
         // Store the ID for return and create the full Asset object
-        let id = serialized.id;
         let asset = Asset::from_serialized(self, serialized)?;
 
-        // Register the asset in the manager's storage
-        self.assets.lock().insert(id, Arc::new(asset));
-        Ok(id)
+        Ok(self.register_asset(asset_path, asset))
     }
 }
 
