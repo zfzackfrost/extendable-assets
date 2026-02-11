@@ -120,8 +120,8 @@ impl AssetManager {
 
     /// Registers an asset with the manager and assigns it a deterministic ID.
     ///
-    /// The asset ID is generated from the asset path using hash-based generation,
-    /// ensuring the same path always produces the same ID.
+    /// If the asset's ID is non-zero, the ID is generated from the asset path using
+    /// hash-based generation, ensuring the same path always produces the same ID.
     ///
     /// # Arguments
     ///
@@ -132,8 +132,13 @@ impl AssetManager {
     ///
     /// The deterministic ID assigned to the asset
     pub fn register_asset(&self, asset_path: &str, mut asset: Asset) -> AssetId {
-        let id = AssetId::from(asset_path);
-        asset.set_id(id);
+        let id = if asset.id() == AssetId::default() {
+            let new_id = AssetId::from(asset_path);
+            asset.set_id(new_id);
+            new_id
+        } else {
+            asset.id()
+        };
         self.assets.lock().insert(id, Arc::new(asset));
         id
     }
