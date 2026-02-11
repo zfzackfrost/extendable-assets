@@ -4,9 +4,6 @@ use std::sync::{Arc, Weak};
 use downcast_rs::{DowncastSync, impl_downcast};
 use parking_lot::Mutex;
 
-use xxhash_rust::const_xxh3::const_custom_default_secret;
-use xxhash_rust::xxh3::xxh3_64_with_secret;
-
 use crate::asset::{Asset, AssetId, AssetSerializationBackend, NullSerializationBackend};
 use crate::asset_type::AssetType;
 use crate::filesystem::{Filesystem, FilesystemError};
@@ -120,55 +117,7 @@ impl AssetManager {
         let assets = self.assets.lock();
         assets.get(&id).cloned()
     }
-    /// Encodes an asset path using percent-encoding for URI safety.
-    ///
-    /// Applies RFC 3986 percent-encoding to asset paths, preserving forward slashes
-    /// and unreserved characters while encoding everything else. This ensures asset
-    /// paths are safe for use in URIs and filesystem operations.
-    ///
-    /// # Arguments
-    ///
-    /// * `asset_path` - The asset path to encode
-    ///
-    /// # Returns
-    ///
-    /// A percent-encoded version of the asset path
-    #[inline]
-    pub fn encode_asset_path(&self, asset_path: &str) -> String {
-        asset_path
-            .chars()
-            .map(|c| {
-                match c {
-                    // Unreserved characters (RFC 3986)
-                    'A'..='Z' | 'a'..='z' | '0'..='9' | '-' | '_' | '.' | '~' => c.to_string(),
-                    // Preserve forward slashes
-                    '/' => c.to_string(),
-                    // Everything else gets percent-encoded
-                    _ => {
-                        let mut buf = [0; 4];
-                        let encoded = c.encode_utf8(&mut buf);
-                        let mut strs = encoded.bytes().map(|b| format!("%{:02X}", b));
-                        if c.is_ascii() {
-                            strs.next_back().unwrap()
-                        } else {
-                            strs.collect::<String>()
-                        }
-                    }
-                }
-            })
-            .collect()
-    }
-    /// Generates a deterministic asset ID from an asset path.
-    ///
-    /// Uses XXH3 hash with a custom secret to generate consistent IDs
-    /// for the same asset path across application restarts.
-    #[inline]
-    fn gen_asset_id(&self, asset_path: &str) -> AssetId {
-        let asset_path: String = self.encode_asset_path(asset_path);
 
-        const SECRET: [u8; 192] = const_custom_default_secret(1111);
-        xxh3_64_with_secret(asset_path.as_bytes(), &SECRET).into()
-    }
     /// Registers an asset with the manager and assigns it a deterministic ID.
     ///
     /// The asset ID is generated from the asset path using hash-based generation,
@@ -183,7 +132,7 @@ impl AssetManager {
     ///
     /// The deterministic ID assigned to the asset
     pub fn register_asset(&self, asset_path: &str, mut asset: Asset) -> AssetId {
-        let id = self.gen_asset_id(asset_path);
+        let id = AssetId::from(asset_path);
         asset.set_id(id);
         self.assets.lock().insert(id, Arc::new(asset));
         id
@@ -254,7 +203,7 @@ impl AssetManager {
 
         // Generate a deterministic ID if the asset doesn't have one
         if serialized.id == AssetId::from(0) {
-            serialized.id = self.gen_asset_id(asset_path);
+            serialized.id = AssetId::from(asset_path);
         }
 
         // Store the ID for return and create the full Asset object
