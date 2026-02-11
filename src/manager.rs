@@ -7,7 +7,7 @@ use parking_lot::Mutex;
 use xxhash_rust::const_xxh3::const_custom_default_secret;
 use xxhash_rust::xxh3::xxh3_64_with_secret;
 
-use crate::asset::{Asset, AssetId};
+use crate::asset::{Asset, AssetId, AssetSerializationBackend, NullSerializationBackend};
 use crate::asset_type::AssetType;
 use crate::filesystem::{Filesystem, FilesystemError};
 use crate::util::U64HashMap;
@@ -28,6 +28,8 @@ pub struct AssetManager {
     filesystem: Arc<dyn Filesystem>,
     /// Optional context for providing additional state to the asset manager
     context: Option<Arc<dyn AssetManagerContext>>,
+    /// Backend implementation for serializing and deserializing assets
+    serialization: Box<dyn AssetSerializationBackend>,
 }
 impl AssetManager {
     /// Creates a new asset manager with the provided filesystem.
@@ -42,6 +44,7 @@ impl AssetManager {
             assets: Mutex::new(HashMap::default()),
             filesystem,
             context: None,
+            serialization: Box::new(NullSerializationBackend),
         }
     }
 
@@ -62,6 +65,18 @@ impl AssetManager {
     #[inline]
     pub fn set_context(&mut self, context: Arc<dyn AssetManagerContext>) {
         self.context = Some(context);
+    }
+
+    /// Sets the serialization backend for the asset manager.
+    ///
+    /// This allows changing how assets are serialized and deserialized.
+    /// The backend determines the format used for asset persistence.
+    ///
+    /// # Arguments
+    ///
+    /// * `serialization` - The serialization backend implementation to use
+    pub fn set_serialization_backend(&mut self, serialization: Box<dyn AssetSerializationBackend>) {
+        self.serialization = serialization;
     }
 
     /// Retrieves an asset type by its name.
