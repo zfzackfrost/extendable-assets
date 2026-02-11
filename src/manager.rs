@@ -222,6 +222,49 @@ impl AssetManager {
     pub async fn fs_read_bytes(&self, asset_path: &str) -> Result<Vec<u8>, FilesystemError> {
         self.filesystem.read_bytes(asset_path).await
     }
+
+    /// Asynchronously reads an asset file and registers it with the manager.
+    ///
+    /// This method combines file reading with asset deserialization and registration.
+    /// It reads the asset file from the filesystem, deserializes it using the configured
+    /// serialization backend, and registers the resulting asset with the manager.
+    /// If the asset has no ID (ID is 0), it generates one deterministically from the path.
+    ///
+    /// # Arguments
+    ///
+    /// * `asset_path` - The path to the asset file to read and register
+    ///
+    /// # Returns
+    ///
+    /// A future that resolves to the asset ID if successful, or an error if reading,
+    /// deserialization, or asset creation fails.
+    ///
+    /// # Errors
+    ///
+    /// This function will return an error if:
+    /// - The file cannot be read from the filesystem
+    /// - The file contents cannot be deserialized
+    /// - Asset creation from the serialized data fails
+    pub async fn fs_read_and_register_asset(&self, asset_path: &str) -> anyhow::Result<AssetId> {
+        // Read the raw bytes from the filesystem
+        let bytes = self.fs_read_bytes(asset_path).await?;
+
+        // Deserialize the bytes into a SerializedAsset structure
+        let mut serialized = self.serialization.deserialize(&bytes[..])?;
+
+        // Generate a deterministic ID if the asset doesn't have one
+        if serialized.id == AssetId::from(0) {
+            serialized.id = self.gen_asset_id(asset_path);
+        }
+
+        // Store the ID for return and create the full Asset object
+        let id = serialized.id;
+        let asset = Asset::from_serialized(self, serialized)?;
+
+        // Register the asset in the manager's storage
+        self.assets.lock().insert(id, Arc::new(asset));
+        Ok(id)
+    }
 }
 
 /// Trait for providing additional context to the asset manager.

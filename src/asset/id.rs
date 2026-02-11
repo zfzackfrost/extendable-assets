@@ -4,7 +4,7 @@ use rand::distr::{Distribution, StandardUniform};
 
 use std::hash::Hash;
 
-#[derive(Clone, Copy)]
+#[derive(Default, Clone, Copy)]
 #[derive(PartialEq, PartialOrd, Ord, Eq)]
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(transparent)]

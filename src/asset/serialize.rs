@@ -12,6 +12,7 @@ use crate::asset::AssetId;
 #[derive(Deserialize, Serialize)]
 pub struct SerializedAsset {
     /// The unique identifier of the asset
+    #[serde(default)]
     pub id: AssetId,
     /// The name of the asset type used to determine how to deserialize the data
     pub asset_type: String,
@@ -43,7 +44,7 @@ pub trait AssetSerializationBackend: Send + Sync {
     /// # Returns
     /// The serialized bytes on success, or an error if serialization fails
     fn serialize(&self, asset: &SerializedAsset) -> anyhow::Result<Vec<u8>>;
-    
+
     /// Deserializes bytes back into a SerializedAsset using the backend's format.
     ///
     /// # Arguments
