@@ -2,6 +2,10 @@ mod context;
 #[allow(unused_imports)]
 pub use context::*;
 
+mod string;
+#[allow(unused_imports)]
+pub use string::*;
+
 use extendable_assets::*;
 use rand::Rng;
 use rand::RngExt;
@@ -79,6 +83,7 @@ pub fn init_mgr() -> AssetManager {
 pub fn register_types(mgr: &AssetManager) {
     mgr.register_asset_type(Arc::new(TestAssetType));
     mgr.register_asset_type(Arc::new(TestContextAssetType));
+    mgr.register_asset_type(Arc::new(TestStringAssetType));
 }
 #[allow(unused)]
 pub fn register_assets(mgr: &AssetManager) -> AssetId {
