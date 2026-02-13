@@ -31,3 +31,16 @@ fn register_get_asset() {
     let asset = mgr.asset_by_id(asset_id).unwrap();
     assert_eq!(asset.id(), asset_id);
 }
+
+#[test]
+fn read_and_register_asset() {
+    let mut mgr = init_mgr();
+    mgr.set_serialization_backend(Box::new(JsonAssetSerializationBackend));
+    register_types(&mgr);
+
+    let asset_id =
+        pollster::block_on(mgr.fs_read_and_register_asset("test_data_0/asset.json")).unwrap();
+    let asset = mgr.asset_by_id(asset_id).unwrap();
+    let data = asset.data().downcast_ref::<TestStringAssetData>().unwrap();
+    assert_eq!(data.value, "Hello asset");
+}
