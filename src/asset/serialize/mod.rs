@@ -6,6 +6,11 @@ mod json_backend;
 #[cfg(feature = "backend-json")]
 pub use json_backend::*;
 
+#[cfg(feature = "backend-msgpack")]
+mod msgpack_backend;
+#[cfg(feature = "backend-msgpack")]
+pub use msgpack_backend::*;
+
 use serde::{Deserialize, Serialize};
 
 use crate::asset::AssetId;
