@@ -57,3 +57,27 @@ impl AssetSerializationBackend for MsgpackAssetSerializationBackend {
         Ok(rmp_serde::from_slice(bytes)?)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use rand::prelude::*;
+
+    #[test]
+    fn serialize_deserialize_asset() {
+        let backend = MsgpackAssetSerializationBackend;
+
+        let asset_type = (0..10)
+            .map(|_| rand::rng().random_range('a'..='z'))
+            .collect::<String>();
+        let data: [u8; 128] = rand::rng().random();
+        let asset = SerializedAsset {
+            id: rand::rng().random(),
+            asset_type,
+            data: Vec::from(data),
+        };
+        let serialized = backend.serialize(&asset).unwrap();
+        let deserialized = backend.deserialize(&serialized).unwrap();
+        assert_eq!(asset, deserialized);
+    }
+}
