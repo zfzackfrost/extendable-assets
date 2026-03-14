@@ -61,6 +61,7 @@ impl AssetSerializationBackend for JsonAssetSerializationBackend {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::asset::SerializedData;
     use rand::prelude::*;
 
     #[test]
@@ -74,7 +75,7 @@ mod test {
         let asset = SerializedAsset {
             id: rand::rng().random(),
             asset_type,
-            data: Vec::from(data),
+            data: SerializedData::Uncompressed(Vec::from(data)),
         };
         let serialized = backend.serialize(&asset).unwrap();
         let deserialized = backend.deserialize(&serialized).unwrap();

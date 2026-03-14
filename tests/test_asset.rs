@@ -25,7 +25,7 @@ fn from_serialized() {
     let serialized = SerializedAsset {
         asset_type: "TestAsset".into(),
         id: rand::rng().random(),
-        data: asset_data_bytes,
+        data: SerializedData::Uncompressed(asset_data_bytes),
     };
 
     let id = serialized.id;
@@ -63,7 +63,7 @@ fn from_serialized_with_context() {
     let serialized = SerializedAsset {
         asset_type: "TestContextAsset".into(),
         id: rand::rng().random(),
-        data: asset_data_bytes,
+        data: SerializedData::Uncompressed(asset_data_bytes),
     };
 
     let id = serialized.id;

@@ -1,5 +1,7 @@
 mod backend;
+mod data;
 pub use backend::*;
+pub use data::*;
 
 #[cfg(feature = "backend-json")]
 mod json_backend;
@@ -29,9 +31,8 @@ pub struct SerializedAsset {
     pub id: AssetId,
     /// The name of the asset type used to determine how to deserialize the data
     pub asset_type: String,
-    /// The serialized asset data as raw bytes
-    #[serde(with = "serde_bytes")]
-    pub data: Vec<u8>,
+    /// The serialized asset data, which may be compressed
+    pub data: SerializedData,
 }
 
 impl PartialEq for SerializedAsset {
@@ -52,11 +53,11 @@ mod test {
 
     /// Static test data with 'static lifetime required by Token::Bytes.
     /// LazyLock provides thread-safe lazy initialization of random data.
-    static DATA: LazyLock<Vec<u8>> = LazyLock::new(|| {
+    static DATA: LazyLock<SerializedData> = LazyLock::new(|| {
         let mut rng = rand::rng();
         let mut data = vec![0u8; 128];
         rng.fill(&mut data[..]);
-        data
+        SerializedData::Uncompressed(data)
     });
 
     /// Tests SerializedAsset serde implementation
@@ -83,7 +84,7 @@ mod test {
             Token::String("TestAsset"),
             Token::Str("data"),
             // Token::Bytes requires &'static [u8], provided by static DATA
-            Token::Bytes(&DATA[..]),
+            Token::Bytes(DATA.data()),
             Token::StructEnd,
         ];
         assert_tokens(&asset, tokens);

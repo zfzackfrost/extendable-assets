@@ -107,11 +107,21 @@ impl Asset {
         // Upgrade the weak reference to ensure the asset type is still valid
         let asset_type_ptr = asset_type.upgrade().ok_or(AssetError::TypeDropped)?;
         // Get the serialized data bytes
-        let data_bytes = serialized.data;
+        let decompressed_data;
+        let data_bytes = if let Some(compression_mode) = serialized.data.compression_mode() {
+            decompressed_data = compression_mode
+                .decompress(serialized.data.data())
+                .ok_or_else(|| {
+                    AssetError::Other(anyhow::anyhow!("Failed to decompress asset data"))
+                })?;
+            &decompressed_data
+        } else {
+            serialized.data.data()
+        };
         // Use the asset type's loader to deserialize the data
         let data = asset_type_ptr
             .loader()
-            .asset_from_bytes(&data_bytes, mgr.context())
+            .asset_from_bytes(data_bytes, mgr.context())
             .map_err(AssetError::from)?;
         Ok(Self {
             id,
