@@ -1,6 +1,8 @@
 mod backend;
+mod compression;
 mod data;
 pub use backend::*;
+pub use compression::*;
 pub use data::*;
 
 #[cfg(feature = "backend-json")]
