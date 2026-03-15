@@ -7,7 +7,7 @@ homepage = "https://github.com/zfzackfrost/extendable-assets"
 repository = "https://github.com/zfzackfrost/extendable-assets"
 keywords = ["asset", "graphics", "framework", "game"]
 categories = ["graphics", "game-development", "filesystem"]
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [dependencies]
