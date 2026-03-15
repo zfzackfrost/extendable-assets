@@ -12,5 +12,5 @@ Generative AI has been used to assist in writing documentation and commit messag
 in this project has been written by a human.
 
 [CratesIO]: https://crates.io/crates/extendable-assets
-[DocsRS]: https://docs.rs/extendable-assets/latest/extendable-assets/
+[DocsRS]: https://docs.rs/extendable-assets/latest/extendable_assets/
 [LICENSE]: https://github.com/zfzackfrost/extendable-assets/blob/main/LICENSE
