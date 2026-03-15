@@ -1,7 +1,12 @@
 [package]
 name = "extendable-assets"
 description = "Asset framework for graphics and games"
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/zfzackfrost/extendable-assets"
+repository = "https://github.com/zfzackfrost/extendable-assets"
 keywords = ["asset", "graphics", "framework", "game"]
+categories = ["graphics", "game-development", "filesystem"]
 version = "0.1.0"
 edition = "2024"
 
